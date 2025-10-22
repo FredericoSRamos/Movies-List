@@ -4,6 +4,7 @@ require('dotenv').config(); // Carrega as variáveis de ambiente do arquivo .env
 
 const movieRoutes = require('./routes/movies');
 const favoriteRoutes = require('./routes/favorites');
+const authRoutes = require('./routes/auth');
 
 // Inicializa a aplicação Express
 const app = express();
@@ -13,9 +14,10 @@ app.use(express.json()); // Habilita o parsing de JSON no corpo das requisiçõe
 
 // Rota de teste
 app.get('/', (req, res) => {
-  res.send('API do desafio está no ar!');
+  res.send('API está no ar!');
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/favorites', favoriteRoutes);
 
