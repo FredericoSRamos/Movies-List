@@ -13,7 +13,7 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`http://localhost:3001/api/movies/search?query=${query}`);
+      const response = await axios.get(`http://localhost:5000/api/movies/search?query=${query}`);
       setMovies(response.data.results);
     } catch (err) {
       setError('Não foi possível buscar os filmes. Tente novamente.');

@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config(); // Carrega as variáveis de ambiente do arquivo .env
 
 const movieRoutes = require('./routes/movies');
+const favoriteRoutes = require('./routes/favorites');
 
 // Inicializa a aplicação Express
 const app = express();
@@ -16,6 +17,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/movies', movieRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 // Define a porta a partir das variáveis de ambiente ou usa 5000 como padrão
 const PORT = process.env.PORT || 5000;

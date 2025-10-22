@@ -15,8 +15,10 @@ router.get('/search', async (req, res) => {
 
   try {
     const response = await axios.get(`${TMDB_BASE_URL}/search/movie`, {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`
+      },
       params: {
-        api_key: API_KEY,
         query: query,
         language: 'pt-BR',
       },
@@ -33,10 +35,13 @@ router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const response = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
-            params: {
-                api_key: API_KEY,
-                language: 'pt-BR'
-            }
+          headers: {
+            Authorization: `Bearer ${API_KEY}`
+          },
+          params: {
+              api_key: API_KEY,
+              language: 'pt-BR'
+          }
         });
         res.json(response.data);
     } catch (error) {
