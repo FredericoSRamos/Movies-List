@@ -1,83 +1,80 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const db = require('../db');
+const authenticateToken = require('../middleware/autheticateToken');
 
-const favoritesDbPath = path.join(__dirname, '..', 'data', 'favorites.json');
-
-// Função para ler o "banco de dados"
-const readFavorites = () => {
-  const data = fs.readFileSync(favoritesDbPath);
-  return JSON.parse(data);
-};
-
-// Função para escrever no "banco de dados"
-const writeFavorites = (data) => {
-  fs.writeFileSync(favoritesDbPath, JSON.stringify(data, null, 2));
-};
-
-// POST /api/favorites/new - Cria uma nova lista de favoritos
-router.post('/new', (req, res) => {
-    const favorites = readFavorites();
-    const newListId = uuidv4(); // Gera um ID único para a lista
-    favorites[newListId] = []; // Inicia com uma lista vazia
-    writeFavorites(favorites);
-    res.status(201).json({ listId: newListId });
+// GET /api/favorites - Obtém os favoritos do usuário
+router.get('/', authenticateToken, async (req, res) => {
+  try {
+    const favorites = await db('favorite_movies').where({ user_id: req.user.id });
+    res.json(favorites);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar favoritos.' });
+  }
 });
 
-// GET /api/favorites/:listId - Obtém uma lista de favoritos
-router.get('/:listId', (req, res) => {
-    const favorites = readFavorites();
-    const { listId } = req.params;
-    if (favorites[listId]) {
-        res.json(favorites[listId]);
+// POST /api/favorites/add - Adiciona um filme aos favoritos do usuário
+router.post('/add', authenticateToken, async (req, res) => {
+  const { movie } = req.body;
+  
+  if (!movie || !movie.id) {
+    return res.status(400).json({ error: 'Dados do filme são inválidos.' });
+  }
+  
+  const favoriteMovie = {
+    user_id: req.user.id,
+    movie_id: movie.id,
+    title: movie.title,
+    poster_path: movie.poster_path,
+    vote_average: movie.vote_average,
+  };
+
+  try {
+    await db('favorite_movies').insert(favoriteMovie);
+    res.status(201).json(favoriteMovie);
+  } catch (error) {
+     if (error.code === 'SQLITE_CONSTRAINT') {
+        return res.status(409).json({ error: 'Este filme já está nos seus favoritos.' });
+    }
+    res.status(500).json({ error: 'Erro ao adicionar aos favoritos.' });
+  }
+});
+
+// DELETE /api/favorites/remove/:movieId - Remove um filme dos favoritos do usuário
+router.delete('/remove/:movieId', authenticateToken, async (req, res) => {
+  const { movieId } = req.params;
+  
+  try {
+    const deletedCount = await db('favorite_movies')
+      .where({ user_id: req.user.id, movie_id: movieId })
+      .del();
+
+    if (deletedCount > 0) {
+      res.status(200).json({ message: 'Filme removido dos favoritos.' });
     } else {
-        res.status(404).json({ error: 'Lista de favoritos não encontrada.' });
+      res.status(404).json({ error: 'Filme não encontrado nos favoritos.' });
     }
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao remover dos favoritos.' });
+  }
 });
 
-// POST /api/favorites/:listId/add - Adiciona um filme à lista
-router.post('/:listId/add', (req, res) => {
-    const { movie } = req.body;
-    if (!movie || !movie.id) {
-        return res.status(400).json({ error: 'Dados do filme são inválidos.' });
-    }
-    
-    const favorites = readFavorites();
-    const { listId } = req.params;
+// Rota pública para compartilhamento
+// GET /api/favorites/public/:userId
+router.get('/public/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const favorites = await db('favorite_movies').where({ user_id: userId });
+    const user = await db('users').where({ id: userId }).first('username');
 
-    if (!favorites[listId]) {
-        return res.status(404).json({ error: 'Lista de favoritos não encontrada.' });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
     }
-    
-    // Evita filmes duplicados
-    if (!favorites[listId].some(m => m.id === movie.id)) {
-        favorites[listId].push(movie);
-        writeFavorites(favorites);
-    }
-    
-    res.status(200).json(favorites[listId]);
-});
 
-// DELETE /api/favorites/:listId/remove/:movieId - Remove um filme da lista
-router.delete('/:listId/remove/:movieId', (req, res) => {
-    const favorites = readFavorites();
-    const { listId, movieId } = req.params;
-
-    if (!favorites[listId]) {
-        return res.status(404).json({ error: 'Lista de favoritos não encontrada.' });
-    }
-    
-    const initialLength = favorites[listId].length;
-    favorites[listId] = favorites[listId].filter(m => m.id.toString() !== movieId);
-    
-    if (favorites[listId].length < initialLength) {
-        writeFavorites(favorites);
-        res.status(200).json(favorites[listId]);
-    } else {
-        res.status(404).json({ error: 'Filme não encontrado na lista de favoritos.' });
-    }
+    res.json({ username: user.username, favorites });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar lista pública de favoritos.' });
+  }
 });
 
 module.exports = router;
