@@ -65,3 +65,44 @@
 .error {
     color: red;
 }
+
+.card-actions {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.card-actions button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #61dafb;
+    color: #282c34;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.card-actions button.remove-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+a {
+    color: #61dafb;
+}
+
+.share-section {
+    margin: 20px;
+    padding: 20px;
+    background: #f0f0f0;
+    border-radius: 8px;
+}
+
+.share-section input {
+    width: 80%;
+    max-width: 400px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
