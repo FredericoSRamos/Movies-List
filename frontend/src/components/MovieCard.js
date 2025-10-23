@@ -1,21 +1,30 @@
 import React from 'react';
 
-const MovieCard = ({ movie, onAddToFavorites, onRemoveFromFavorites, isFavorite }) => {
+const MovieCard = ({ movie, onAddToFavorites, onRemoveFromFavorites }) => {
+  // URL de placeholder para quando a imagem não existir
   const posterUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    : 'https://via.placeholder.com/500x750.png?text=No+Image';
+    : 'https://via.placeholder.com/500x750.png?text=Imagem+N%C3%A3o+Dispon%C3%ADvel';
+
+  const movieIdToRemove = movie.id || movie.movie_id;
 
   return (
     <div className="movie-card">
-      <img src={posterUrl} alt={movie.title} />
-      <h3>{movie.title}</h3>
-      <p>Lançamento: {movie.release_date}</p>
-      <div className="rating">
-        <span>⭐ {movie.vote_average.toFixed(1)}</span>
+      <img src={posterUrl} alt={movie.title} className="movie-poster" />
+
+      <div className="card-body">
+        <h3>{movie.title}</h3>
+        <p>Lançamento: {movie.release_date || 'Não informado'}</p>
       </div>
-      <div className="card-actions">
-        {onAddToFavorites && <button onClick={() => onAddToFavorites(movie)}>Adicionar aos Favoritos</button>}
-        {onRemoveFromFavorites && <button className="remove-btn" onClick={() => onRemoveFromFavorites(movie.id)}>Remover</button>}
+
+      <div className="card-footer">
+        <div className="rating">
+          <span>⭐ {(movie.vote_average || 0).toFixed(1)}</span>
+        </div>
+        <div className="card-actions">
+          {onAddToFavorites && <button onClick={() => onAddToFavorites(movie)}>Adicionar aos Favoritos</button>}
+          {onRemoveFromFavorites && <button className="remove-btn" onClick={() => onRemoveFromFavorites(movieIdToRemove)}>Remover</button>}
+        </div>
       </div>
     </div>
   );
