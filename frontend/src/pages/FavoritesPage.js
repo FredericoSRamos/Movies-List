@@ -1,29 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import MovieCard from '../components/MovieCard';
 
 const FavoritesPage = () => {
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [shareableLink, setShareableLink] = useState('');
-    const listId = localStorage.getItem('favoritesListId');
-    const baseURL = 'http://localhost:5000/api'
+    const user = JSON.parse(localStorage.getItem('user'));
 
     const fetchFavorites = useCallback(async () => {
-        if (!listId) {
-            setLoading(false);
-            return;
-        }
         try {
-            const response = await axios.get(`${baseURL}/favorites/${listId}`);
+            const response = await api.get('/favorites');
             setFavorites(response.data);
-            setShareableLink(`${window.location.origin}/shared/${listId}`);
+            if (user) {
+                setShareableLink(`${window.location.origin}/shared/user/${user.id}`);
+            }
         } catch (error) {
             console.error("Erro ao buscar favoritos:", error);
         } finally {
             setLoading(false);
         }
-    }, [listId]);
+    }, [user]);
 
     useEffect(() => {
         fetchFavorites();
@@ -31,9 +28,8 @@ const FavoritesPage = () => {
 
     const removeFromFavorites = async (movieId) => {
         try {
-            await axios.delete(`${baseURL}/favorites/${listId}/remove/${movieId}`);
-            // Atualiza a lista após a remoção
-            setFavorites(prevFavorites => prevFavorites.filter(movie => movie.id !== movieId));
+            await api.delete(`/favorites/remove/${movieId}`);
+            setFavorites(prevFavorites => prevFavorites.filter(movie => movie.movie_id !== movieId));
         } catch (error) {
             alert("Erro ao remover o filme dos favoritos.");
         }
@@ -44,10 +40,7 @@ const FavoritesPage = () => {
     return (
         <div>
             <header className="App-header">
-                <h1>Meus Filmes Favoritos</h1>
-                 <p>
-                    <a href="/">Voltar para a Busca</a>
-                </p>
+                <h2>Meus Filmes Favoritos</h2>
             </header>
             <main>
                 {shareableLink && (
@@ -60,11 +53,16 @@ const FavoritesPage = () => {
                     <p>Você ainda não adicionou nenhum filme aos favoritos.</p>
                 ) : (
                     <div className="movie-list">
-                        {favorites.map((movie) => (
-                            <MovieCard
-                                key={movie.id}
-                                movie={movie}
-                                onRemoveFromFavorites={removeFromFavorites}
+                        {favorites.map((fav) => (
+                             <MovieCard
+                                key={fav.movie_id}
+                                movie={{
+                                    id: fav.movie_id,
+                                    title: fav.title,
+                                    poster_path: fav.poster_path,
+                                    vote_average: fav.vote_average
+                                }}
+                                onRemoveFromFavorites={() => removeFromFavorites(fav.movie_id)}
                             />
                         ))}
                     </div>
