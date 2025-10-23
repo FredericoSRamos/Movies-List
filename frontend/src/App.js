@@ -34,12 +34,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage setAuth={setAuth} />} />
           <Route path="/register" element={<RegisterPage />} />
-          
-          <Route path="/" element={
-            <PrivateRoute isAuthenticated={isAuthenticated}>
-              <HomePage />
-            </PrivateRoute>
-          } />
+          <Route path="/" element={<HomePage isAuthenticated={isAuthenticated} />} />
+
           <Route path="/favorites" element={
             <PrivateRoute isAuthenticated={isAuthenticated}>
               <FavoritesPage />

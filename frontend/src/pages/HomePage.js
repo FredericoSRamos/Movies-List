@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import SearchBar from '../components/SearchBar';
 import MovieCard from '../components/MovieCard';
 
-const HomePage = () => {
+const HomePage = ({ isAuthenticated }) => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     const searchMovies = async (query) => {
         setLoading(true);
@@ -22,18 +24,24 @@ const HomePage = () => {
     };
 
     const addToFavorites = async (movie) => {
-        try {
-            await api.post('/favorites/add', { movie });
-            alert(`${movie.title} adicionado aos favoritos!`);
-        } catch (err) {
-            alert(err.response?.data?.error || "Erro ao adicionar o filme aos favoritos.");
+        if (isAuthenticated) {
+            try {
+                await api.post('/favorites/add', { movie });
+                alert(`${movie.title} adicionado aos favoritos!`);
+            } catch (err) {
+                alert(err.response?.data?.error || "Erro ao adicionar o filme aos favoritos.");
+            }
+        } else {
+            alert('Você precisa fazer login para adicionar filmes aos favoritos.');
+            navigate('/login');
         }
     };
 
     return (
         <div>
             <header className="App-header">
-                <h2>Busque e Adicione Filmes à sua Lista</h2>
+                <h2>Busque por Filmes</h2>
+                <p>Encontre informações sobre qualquer filme e adicione os seus favoritos à sua lista pessoal.</p>
                 <SearchBar onSearch={searchMovies} />
             </header>
             <main>
