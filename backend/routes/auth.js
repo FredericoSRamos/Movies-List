@@ -14,7 +14,11 @@ router.post('/register', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const [id] = await db('users').insert({ username, password: hashedPassword });
-    res.status(201).json({ message: 'Usuário criado com sucesso!', userId: id });
+    const token = jwt.sign({ id: id, username: username }, process.env.JWT_SECRET, {
+      expiresIn: '1d',
+    });
+
+    res.status(201).json({ token, userId: id, username: username });
   } catch (error) {
     if (error.code === 'SQLITE_CONSTRAINT') {
         return res.status(409).json({ error: 'Nome de usuário já existe.' });

@@ -33,7 +33,7 @@ function App() {
         <Navbar isAuthenticated={isAuthenticated} setAuth={setAuth} />
         <Routes>
           <Route path="/login" element={<LoginPage setAuth={setAuth} />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register" element={<RegisterPage setAuth={setAuth} />} />
           <Route path="/" element={<HomePage isAuthenticated={isAuthenticated} />} />
 
           <Route path="/favorites" element={

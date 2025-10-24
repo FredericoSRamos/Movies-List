@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
-const RegisterPage = () => {
+const RegisterPage = ({ setAuth }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -12,8 +12,14 @@ const RegisterPage = () => {
         e.preventDefault();
         setError('');
         try {
-            await api.post('/auth/register', { username, password });
-            navigate('/login');
+            const response = await api.post('/auth/register', { username, password });
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('user', JSON.stringify({
+                id: response.data.userId,
+                username: response.data.username
+            }));
+            setAuth(true); // Atualiza o estado de autenticação
+            navigate('/');
         } catch (err) {
             setError(err.response?.data?.error || 'Erro ao registrar.');
         }
