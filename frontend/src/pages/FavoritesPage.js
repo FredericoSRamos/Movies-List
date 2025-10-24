@@ -38,6 +38,19 @@ const FavoritesPage = () => {
         }
     };
 
+    const handleCopyLink = () => {
+        if (!shareableLink) return;
+
+        navigator.clipboard.writeText(shareableLink)
+            .then(() => {
+                addNotification('Link copiado para a área de transferência!', 'success');
+            })
+            .catch(err => {
+                console.error('Falha ao copiar o link: ', err);
+                addNotification('Não foi possível copiar o link.', 'error');
+            });
+    };
+
     if (loading) return <p>Carregando seus favoritos...</p>;
 
     return (
@@ -49,7 +62,10 @@ const FavoritesPage = () => {
                 {shareableLink && (
                     <div className="share-section">
                         <h3>Compartilhe sua lista!</h3>
-                        <input type="text" value={shareableLink} readOnly />
+                        <div className="share-input-group">
+                            <input type="text" value={shareableLink} readOnly />
+                            <button onClick={handleCopyLink}>Copiar</button>
+                        </div>
                     </div>
                 )}
                 {favorites.length === 0 ? (
