@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import MovieCard from '../components/MovieCard';
+import { useNotification } from '../hooks/useNotification';
 
 const FavoritesPage = () => {
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [shareableLink, setShareableLink] = useState('');
+    const { addNotification } = useNotification();
     const user = JSON.parse(localStorage.getItem('user'));
 
     const fetchFavorites = useCallback(async () => {
@@ -30,8 +32,9 @@ const FavoritesPage = () => {
         try {
             await api.delete(`/favorites/remove/${movieId}`);
             setFavorites(prevFavorites => prevFavorites.filter(movie => movie.movie_id !== movieId));
+            addNotification('Filme removido dos favoritos.', 'success');
         } catch (error) {
-            alert("Erro ao remover o filme dos favoritos.");
+            addNotification("Erro ao remover o filme dos favoritos.", 'error');
         }
     };
 

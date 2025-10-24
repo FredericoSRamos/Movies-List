@@ -6,6 +6,7 @@ import SharedListPage from './pages/SharedListPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Navbar from './components/Navbar';
+import { NotificationProvider } from './context/NotificationContext';
 import './App.css';
 
 const PrivateRoute = ({ children, isAuthenticated }) => {
@@ -28,27 +29,29 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="App">
-        <Navbar isAuthenticated={isAuthenticated} setAuth={setAuth} />
-        <Routes>
-          <Route path="/login" element={<LoginPage setAuth={setAuth} />} />
-          <Route path="/register" element={<RegisterPage setAuth={setAuth} />} />
-          <Route path="/" element={<HomePage isAuthenticated={isAuthenticated} />} />
+    <NotificationProvider>
+      <Router>
+        <div className="App">
+          <Navbar isAuthenticated={isAuthenticated} setAuth={setAuth} />
+          <Routes>
+            <Route path="/login" element={<LoginPage setAuth={setAuth} />} />
+            <Route path="/register" element={<RegisterPage setAuth={setAuth} />} />
+            <Route path="/" element={<HomePage isAuthenticated={isAuthenticated} />} />
 
-          <Route path="/favorites" element={
-            <PrivateRoute isAuthenticated={isAuthenticated}>
-              <FavoritesPage />
-            </PrivateRoute>
-          } />
-          
-          <Route path="/shared/user/:userId" element={<SharedListPage />} />
+            <Route path="/favorites" element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <FavoritesPage />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/shared/user/:userId" element={<SharedListPage />} />
 
-          {/* Rota de fallback */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </div>
-    </Router>
+            {/* Rota de fallback */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
+      </Router>
+    </NotificationProvider>
   );
 }
 

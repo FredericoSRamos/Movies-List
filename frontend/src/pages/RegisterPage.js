@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useNotification } from '../hooks/useNotification';
 
 const RegisterPage = ({ setAuth }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { addNotification } = useNotification();
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        setError('');
         try {
             const response = await api.post('/auth/register', { username, password });
             localStorage.setItem('token', response.data.token);
@@ -19,9 +19,10 @@ const RegisterPage = ({ setAuth }) => {
                 username: response.data.username
             }));
             setAuth(true); // Atualiza o estado de autenticação
+            addNotification('Usuário registrado com sucesso!', 'success');
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.error || 'Erro ao registrar.');
+            addNotification(err.response?.data?.error || 'Erro ao registrar.', 'error');
         }
     };
 
@@ -32,7 +33,6 @@ const RegisterPage = ({ setAuth }) => {
                 <input type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Usuário" required />
                 <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Senha" required />
                 <button type="submit">Registrar</button>
-                {error && <p className="error">{error}</p>}
                 <p>Já tem uma conta? <a href="/login">Faça login</a></p>
             </form>
         </div>

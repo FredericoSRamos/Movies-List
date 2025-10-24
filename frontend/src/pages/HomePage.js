@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import SearchBar from '../components/SearchBar';
 import MovieCard from '../components/MovieCard';
+import { useNotification } from '../hooks/useNotification';
 
 const HomePage = ({ isAuthenticated }) => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const { addNotification } = useNotification();
 
     const searchMovies = async (query) => {
         setLoading(true);
@@ -27,12 +29,12 @@ const HomePage = ({ isAuthenticated }) => {
         if (isAuthenticated) {
             try {
                 await api.post('/favorites/add', { movie });
-                alert(`${movie.title} adicionado aos favoritos!`);
+                addNotification(`${movie.title} adicionado aos favoritos!`, 'success');
             } catch (err) {
-                alert(err.response?.data?.error || "Erro ao adicionar o filme aos favoritos.");
+                addNotification(err.response?.data?.error || "Erro ao adicionar o filme.", 'error');
             }
         } else {
-            alert('Você precisa fazer login para adicionar filmes aos favoritos.');
+            addNotification('Você precisa fazer login para adicionar filmes aos favoritos.', 'info');
             navigate('/login');
         }
     };
